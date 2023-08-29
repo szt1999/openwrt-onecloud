@@ -109,26 +109,18 @@ jobs:
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
         
-    - name: Install Dependents
+    - name: burn
       run: |
           sudo apt install img2simg
-
           ver="v0.3.1"
           curl -L -o ./AmlImg https://github.com/hzyitc/AmlImg/releases/download/$ver/AmlImg_${ver}_linux_amd64
           chmod +x ./AmlImg
-
-    - name: Download and unpack the latest u-boot
-      run: |
           echo "::group::Download"
           curl -L -o ./uboot.img https://github.com/hzyitc/u-boot-onecloud/releases/download/build-20221028-0940/eMMC.burn.img
           echo "::endgroup::"
-
           echo "::group::Unpack"
           ./AmlImg unpack ./uboot.img xd/
           echo "::endgroup::"
-
-    - name: Extract boot and rootfs partitions
-      run: |
           diskimg=$(ls openwrt/bin/targets/*/*/*.img)
           loop=$(sudo losetup --find --show --partscan $diskimg)
           sudo img2simg ${loop}p1 xd/boot.simg
@@ -161,25 +153,17 @@ jobs:
           sudo rm -rf *.img
           sudo losetup -d $loop
           sudo chown $(id -u):$(id -g) -R xd/
-
-    - name: Generate burn image
-      run: |
           echo -n "sha1sum $(sha1sum xd/boot.simg | awk '{print $1}')" >xd/boot.VERIFY
           echo -n "sha1sum $(sha1sum xd/rootfs.simg | awk '{print $1}')" >xd/rootfs.VERIFY
-
           cat <<EOF >>xd/commands.txt
           PARTITION:boot:sparse:boot.simg
           VERIFY:boot:normal:boot.VERIFY
           PARTITION:rootfs:sparse:rootfs.simg
           VERIFY:rootfs:normal:rootfs.VERIFY
           EOF
-
           prefix=$(ls openwrt/bin/targets/*/*/*.img | sed 's/\.img$//')
           burnimg=${prefix}.burn.img
           ./AmlImg pack $burnimg xd/
-          
-    - name: Hash and compress images
-      run: |
           for f in openwrt/bin/targets/*/*/*.burn.img; do
             sha256sum "$f" >"${f}.sha"
             xz --threads=0 --compress "$f"
