@@ -177,16 +177,14 @@ jobs:
           prefix=$(ls openwrt/bin/targets/*/*/*.img | sed 's/\.img$//')
           burnimg=${prefix}.burn.img
           ./AmlImg pack $burnimg xd/
-
-    - name: Hash and compress burn image
-      run: |
-          cd openwrt/bin/targets/*/*
-          burnimg=$(ls *.burn.img)
-          sha256sum $burnimg | tee ${burnimg}.sha
-
-          pixz -9 <$burnimg >${burnimg}.xz
-          sudo rm -rf *.burn.img
           
+    - name: Hash and compress images
+      run: |
+          for f in openwrt/bin/targets/*/*/*.burn.img; do
+            sha256sum "$f" >"${f}.sha"
+            xz --threads=0 --compress "$f"
+          done
+          sudo rm -rf openwrt/bin/targets/*/*/*.burn.img
 
     - name: Check space usage
       if: (!cancelled())
