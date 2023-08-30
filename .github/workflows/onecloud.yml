@@ -154,7 +154,7 @@ jobs:
           EOF
           prefix=$(ls openwrt/bin/targets/*/*/*.img | sed 's/\.img$//')
           burnimg=${prefix}.burn.img
-          ./AmlImg pack $burnimg xd/
+          ./AmlImg pack $burnimg burn/
           for f in openwrt/bin/targets/*/*/*.burn.img; do
             sha256sum "$f" >"${f}.sha"
             xz --threads=0 --compress "$f"
