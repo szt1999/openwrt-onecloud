@@ -116,7 +116,7 @@ jobs:
           curl -L -o ./AmlImg https://github.com/hzyitc/AmlImg/releases/download/$ver/AmlImg_${ver}_linux_amd64
           chmod +x ./AmlImg
           curl -L -o ./uboot.img https://github.com/hzyitc/u-boot-onecloud/releases/download/build-20221028-0940/eMMC.burn.img
-          ./AmlImg unpack ./uboot.img xd/
+          ./AmlImg unpack ./uboot.img burn/
           echo "::endgroup::"
           diskimg=$(ls openwrt/bin/targets/*/*/*.img)
           loop=$(sudo losetup --find --show --partscan $diskimg)
@@ -144,11 +144,11 @@ jobs:
           sudo sync
           sudo umount ${boot_img_mnt}
           sudo umount ${rootfs_img_mnt}
-          sudo img2simg ${loop}p1 xd/boot.simg
-          sudo img2simg openwrt.img xd/rootfs.simg
+          sudo img2simg ${loop}p1 burn/boot.simg
+          sudo img2simg openwrt.img burn/rootfs.simg
           sudo rm -rf *.img
           sudo losetup -d $loop
-          cat <<EOF >>xd/commands.txt
+          cat <<EOF >>burn/commands.txt
           PARTITION:boot:sparse:boot.simg
           PARTITION:rootfs:sparse:rootfs.simg
           EOF
