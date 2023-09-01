@@ -11,7 +11,7 @@
 #
 
 # Uncomment a feed source
-#sed -i 's/^#\(.*helloworld\)/\1/' feeds.conf.default
+sed -i 's/^#\(.*helloworld\)/\1/' feeds.conf.default
 
 # Add a feed source
 #echo 'src-git small https://github.com/shiyu1314/openwrt-packages' >>feeds.conf.default
